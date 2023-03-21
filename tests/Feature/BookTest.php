@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\BookResource\Pages\ListBooks;
 use Tests\TestCase;
 use App\Models\User;
 use Livewire\Livewire;
@@ -44,6 +45,7 @@ class BookTest extends TestCase
         Permission::findOrCreate('add book');
         Permission::findOrCreate('edit book');
         Permission::findOrCreate('delete book');
+        Permission::findOrCreate('borrow book');
         Permission::findOrCreate('approve book request');
         Permission::findOrCreate('deny book request');
 
@@ -53,7 +55,7 @@ class BookTest extends TestCase
             ->givePermissionTo(['view book', 'approve book request', 'deny book request']);
 
         Role::findOrCreate('user')
-            ->givePermissionTo(['view book']);
+            ->givePermissionTo(['view book', 'borrow book']);
 
         $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
@@ -206,6 +208,52 @@ class BookTest extends TestCase
  
         Livewire::test(Book::class)->call('deleteBook', $book->id);
 
-        $this->assertDatabaseMissing('books', ['id' => $book->id]);
+        $this->assertSoftDeleted('books', ['id' => $book->id]);
+    }
+
+    public function test_admin_users_cannot_access_admin_panel()
+    {
+        $response = $this->actingAs($this->super_admin)->get('/admin');
+        $response->assertStatus(403);
+    }
+
+    public function test_users_can_see_books_in_admin_panel()
+    {
+        $response = $this->actingAs($this->user)->get('/admin');
+        $response->assertStatus(200)->assertSee('Books');
+    }
+
+    public function test_users_can_see_book_list_in_admin_panel()
+    {
+        $this->actingAs($this->user);
+
+        $books = Books::factory()->count(10)->create();
+
+        Livewire::test(ListBooks::class)->assertCanSeeTableRecords($books);
+    }
+
+    public function test_user_can_see_title_column_in_book_list()
+    {
+        $this->actingAs($this->user);
+
+        Books::factory()->count(10)->create();
+ 
+        Livewire::test(ListBooks::class)->assertCanRenderTableColumn('title');
+    }
+
+    public function test_user_can_borrow_a_book()
+    {
+        $this->actingAs($this->user);
+ 
+        $books = Books::factory()->count(1)->create();
+ 
+        Livewire::test(ListBooks::class)->callTableBulkAction('borrow', $books);
+    
+        foreach ($books as $book) {
+            $this->assertDatabaseHas('borrowed_books', [
+                'book_id' => $book->id,
+                'user_id' => $this->user->id
+            ]);
+        }
     }
 }

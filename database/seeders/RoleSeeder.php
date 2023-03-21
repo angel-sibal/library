@@ -17,6 +17,7 @@ class RoleSeeder extends Seeder
         Permission::create(['name' => 'add book']);
         Permission::create(['name' => 'edit book']);
         Permission::create(['name' => 'delete book']);
+        Permission::create(['name' => 'borrow book']);
         Permission::create(['name' => 'approve book request']);
         Permission::create(['name' => 'deny book request']);
 
@@ -24,6 +25,6 @@ class RoleSeeder extends Seeder
         Role::create(['name' => 'admin'])
             ->givePermissionTo(['view book', 'approve book request', 'deny book request']);
         Role::create(['name' => 'user'])
-            ->givePermissionTo(['view book']);
+            ->givePermissionTo(['view book', 'borrow book']);
     }
 }

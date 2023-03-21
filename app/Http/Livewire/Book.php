@@ -140,7 +140,7 @@ class Book extends Component
         try {
             $book = Books::find($id);
 
-            if(Storage::disk('public')->exists($book->cover_image_filepath)){
+            if (Storage::disk('public')->exists($book->cover_image_filepath)) {
                 Storage::disk('public')->delete($book->cover_image_filepath);
             }
 
