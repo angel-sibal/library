@@ -6,7 +6,6 @@ use Livewire\Component;
 use App\Models\Book as Books;
 use Livewire\WithFileUploads;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class Book extends Component

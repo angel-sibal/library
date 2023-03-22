@@ -2,17 +2,19 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Resources\BookResource\Pages\ListBooks;
 use Tests\TestCase;
 use App\Models\User;
 use Livewire\Livewire;
 use App\Http\Livewire\Book;
+use App\Models\BorrowedBook;
 use App\Models\Book as Books;
 use Illuminate\Http\UploadedFile;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
+use App\Filament\Resources\BookResource\Pages\ListBooks;
+use App\Filament\Resources\BorrowedBookResource\Pages\ListBorrowedBooks;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class BookTest extends TestCase
@@ -232,7 +234,7 @@ class BookTest extends TestCase
         Livewire::test(ListBooks::class)->assertCanSeeTableRecords($books);
     }
 
-    public function test_user_can_see_title_column_in_book_list()
+    public function test_users_can_see_title_column_in_book_list()
     {
         $this->actingAs($this->user);
 
@@ -241,7 +243,7 @@ class BookTest extends TestCase
         Livewire::test(ListBooks::class)->assertCanRenderTableColumn('title');
     }
 
-    public function test_user_can_borrow_a_book()
+    public function test_users_can_borrow_a_book()
     {
         $this->actingAs($this->user);
  
@@ -254,6 +256,58 @@ class BookTest extends TestCase
                 'book_id' => $book->id,
                 'user_id' => $this->user->id
             ]);
+        }
+    }
+
+    public function test_users_can_see_borrowed_books_in_admin_panel()
+    {
+        $this->actingAs($this->user);
+
+        $books = Books::factory()->count(1)->create();
+ 
+        Livewire::test(ListBooks::class)->callTableBulkAction('borrow', $books);
+
+        $borrowedBooks = BorrowedBook::where('user_id', $this->user->id)->get();
+
+        Livewire::test(ListBorrowedBooks::class)->assertCanSeeTableRecords($borrowedBooks);
+    }
+
+    public function test_users_cannot_borrow_the_same_book_twice()
+    {
+        $this->actingAs($this->user);
+ 
+        $books = Books::factory()->count(1)->create();
+ 
+        Livewire::test(ListBooks::class)->callTableBulkAction('borrow', $books);
+    
+        foreach ($books as $book) {
+            $this->assertDatabaseHas('borrowed_books', [
+                'book_id' => $book->id,
+                'user_id' => $this->user->id
+            ]);
+        }
+
+        Livewire::test(ListBooks::class)->callTableBulkAction('borrow', $books);
+
+        $this->assertDatabaseCount('borrowed_books', 1);
+    }
+
+    public function test_users_can_return_a_borrowed_book()
+    {
+        $this->actingAs($this->user);
+ 
+        $books = Books::factory()->count(1)->create();
+ 
+        Livewire::test(ListBooks::class)->callTableBulkAction('borrow', $books);
+    
+        $this->assertDatabaseCount('borrowed_books', 1);
+        
+        $borrowedBooks = BorrowedBook::get();
+
+        Livewire::test(ListBorrowedBooks::class)->callTableBulkAction('return', $borrowedBooks);
+
+        foreach ($borrowedBooks as $borrowedBook) {
+            $this->assertSoftDeleted('borrowed_books', ['id' => $borrowedBook->id]);
         }
     }
 }

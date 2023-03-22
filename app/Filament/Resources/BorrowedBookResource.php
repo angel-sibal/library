@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Book;
 use App\Models\BorrowedBook;
 use Filament\Resources\Form;
 use Filament\Resources\Table;
@@ -12,11 +11,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Illuminate\Database\Eloquent\Collection;
-use App\Filament\Resources\BookResource\Pages;
+use App\Filament\Resources\BorrowedBookResource\Pages;
 
-class BookResource extends Resource
+class BorrowedBookResource extends Resource
 {
-    protected static ?string $model = Book::class;
+    protected static ?string $model = BorrowedBook::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-collection';
 
@@ -37,12 +36,10 @@ class BookResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')->limit(50)->sortable()->searchable(),
-                TextColumn::make('author')->limit(50)->sortable()->searchable(),
-                ImageColumn::make('cover_image_filepath')->label('Cover Image')->height(100),
-                TextColumn::make('stocks')->sortable(),
-                TextColumn::make('created_at')->sortable(),
-                TextColumn::make('updated_at')->sortable(),
+                TextColumn::make('book.title')->label('Title')->limit(50)->sortable()->searchable(),
+                TextColumn::make('book.author')->label('Author')->limit(50)->sortable()->searchable(),
+                ImageColumn::make('book.cover_image_filepath')->label('Cover Image')->height(100),
+                TextColumn::make('created_at')->label('Borrowed at')->sortable(),
             ])
             ->filters([
                 //
@@ -51,21 +48,18 @@ class BookResource extends Resource
                 //
             ])
             ->bulkActions([
-                BulkAction::make('borrow')
+                BulkAction::make('return')
                 ->action(function (Collection $records, array $data): void {
                     foreach ($records as $record) {
-                        BorrowedBook::firstOrCreate([
-                            'book_id' => $record->id,
-                            'user_id' => auth()->user()->id,
-                        ]);
+                        $record->delete();
                     }
 
                     Notification::make() 
-                    ->title('Borrowed book successfully')
+                    ->title('Returned book successfully')
                     ->success()
                     ->send(); 
                 })
-                ->label('Borrow Books')
+                ->label('Return Books')
                 ->deselectRecordsAfterCompletion()
             ]);
     }
@@ -80,7 +74,7 @@ class BookResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBooks::route('/'),
+            'index' => Pages\ListBorrowedBooks::route('/'),
         ];
     }
 }
