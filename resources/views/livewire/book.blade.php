@@ -21,7 +21,7 @@
         <div class="card">
             <div class="card-body">
                 @if(!$addBook)
-                    @can('add book')
+                    @can('Create Books')
                         <button wire:click="addBook()" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 my-2 px-4 border border-gray-400 rounded shadow">
                             Add New Book
                         </button>

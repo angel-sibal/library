@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\BookResource\Pages;
+namespace App\Filament\Resources\RoleResource\Pages;
 
-use App\Filament\Resources\BookResource;
+use App\Filament\Resources\RoleResource;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditBook extends EditRecord
+class EditRole extends EditRecord
 {
-    protected static string $resource = BookResource::class;
+    protected static string $resource = RoleResource::class;
 
     protected function getActions(): array
     {
@@ -19,6 +19,6 @@ class EditBook extends EditRecord
 
     protected function getSavedNotificationTitle(): ?string
     {
-        return 'Book updated';
+        return 'Role updated';
     }
 }

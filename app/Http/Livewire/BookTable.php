@@ -44,7 +44,7 @@ class BookTable extends DataTableComponent
                 ->sortable(),
         ];
 
-        if (auth()->user()->roles->pluck("name")->first() === 'super-admin') {
+        if (auth()->user()->roles->pluck("name")->first() === 'Super Admin') {
             array_push($columns,
                 Column::make('Actions')
                 ->label(

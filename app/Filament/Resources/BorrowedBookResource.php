@@ -17,7 +17,9 @@ class BorrowedBookResource extends Resource
 {
     protected static ?string $model = BorrowedBook::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark';
+
+    protected static ?int $navigationSort = 2;
 
     public static function canCreate(): bool
     {
@@ -36,10 +38,22 @@ class BorrowedBookResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('book.title')->label('Title')->limit(50)->sortable()->searchable(),
-                TextColumn::make('book.author')->label('Author')->limit(50)->sortable()->searchable(),
-                ImageColumn::make('book.cover_image_filepath')->label('Cover Image')->height(100),
-                TextColumn::make('created_at')->label('Borrowed at')->sortable(),
+                TextColumn::make('book.title')
+                    ->label('Title')
+                    ->limit(50)
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('book.author')
+                    ->label('Author')
+                    ->limit(50)
+                    ->sortable()
+                    ->searchable(),
+                ImageColumn::make('book.cover_image_filepath')
+                    ->label('Cover Image')
+                    ->height(100),
+                TextColumn::make('created_at')
+                    ->label('Borrowed at')
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -55,9 +69,9 @@ class BorrowedBookResource extends Resource
                     }
 
                     Notification::make() 
-                    ->title('Returned book successfully')
-                    ->success()
-                    ->send(); 
+                        ->title('Returned book successfully')
+                        ->success()
+                        ->send(); 
                 })
                 ->label('Return Books')
                 ->deselectRecordsAfterCompletion()

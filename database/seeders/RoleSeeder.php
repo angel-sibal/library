@@ -13,18 +13,22 @@ class RoleSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        Permission::create(['name' => 'view book']);
-        Permission::create(['name' => 'add book']);
-        Permission::create(['name' => 'edit book']);
-        Permission::create(['name' => 'delete book']);
-        Permission::create(['name' => 'borrow book']);
-        Permission::create(['name' => 'approve book request']);
-        Permission::create(['name' => 'deny book request']);
+        Permission::create(['name' => 'View Books']);
+        Permission::create(['name' => 'Create Books']);
+        Permission::create(['name' => 'Edit Books']);
+        Permission::create(['name' => 'Delete Books']);
+        Permission::create(['name' => 'Borrow Books']);
+        Permission::create(['name' => 'Approve Book Requests']);
+        Permission::create(['name' => 'Deny Book Requests']);
+        Permission::create(['name' => 'View Book Requests']);
+        Permission::create(['name' => 'Create Book Requests']);
+        Permission::create(['name' => 'Edit Book Requests']);
+        Permission::create(['name' => 'Delete Book Requests']);
 
-        Role::create(['name' => 'super-admin']);
-        Role::create(['name' => 'admin'])
-            ->givePermissionTo(['view book', 'approve book request', 'deny book request']);
-        Role::create(['name' => 'user'])
-            ->givePermissionTo(['view book', 'borrow book']);
+        Role::create(['name' => 'Super Admin']);
+        Role::create(['name' => 'Admin'])
+            ->givePermissionTo(['View Books', 'Approve Book Requests', 'Deny Book Requests']);
+        Role::create(['name' => 'User'])
+            ->givePermissionTo(['View Books', 'Borrow Books', 'View Book Requests', 'Create Book Requests', 'Edit Book Requests', 'Delete Book Requests']);
     }
 }

@@ -18,7 +18,9 @@ class BookResource extends Resource
 {
     protected static ?string $model = Book::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+
+    protected static ?int $navigationSort = 1;
 
     public static function canCreate(): bool
     {
@@ -37,12 +39,23 @@ class BookResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')->limit(50)->sortable()->searchable(),
-                TextColumn::make('author')->limit(50)->sortable()->searchable(),
-                ImageColumn::make('cover_image_filepath')->label('Cover Image')->height(100),
-                TextColumn::make('stocks')->sortable(),
-                TextColumn::make('created_at')->sortable(),
-                TextColumn::make('updated_at')->sortable(),
+                TextColumn::make('title')
+                    ->limit(50)
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('author')
+                    ->limit(50)
+                    ->sortable()
+                    ->searchable(),
+                ImageColumn::make('cover_image_filepath')
+                    ->label('Cover Image')
+                    ->height(100),
+                TextColumn::make('stocks')
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->sortable(),
+                TextColumn::make('updated_at')
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -52,6 +65,7 @@ class BookResource extends Resource
             ])
             ->bulkActions([
                 BulkAction::make('borrow')
+                ->visible(fn (Book $record): bool => auth()->user()->can('borrow', $record))
                 ->action(function (Collection $records, array $data): void {
                     foreach ($records as $record) {
                         BorrowedBook::firstOrCreate([
@@ -61,9 +75,9 @@ class BookResource extends Resource
                     }
 
                     Notification::make() 
-                    ->title('Borrowed book successfully')
-                    ->success()
-                    ->send(); 
+                        ->title('Borrowed book successfully')
+                        ->success()
+                        ->send(); 
                 })
                 ->label('Borrow Books')
                 ->deselectRecordsAfterCompletion()

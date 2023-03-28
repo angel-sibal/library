@@ -27,34 +27,34 @@ class BookStockTest extends TestCase
         $this->setupPermissions();
 
         $this->user = User::factory()->create();
-        $this->user->assignRole('user');
+        $this->user->assignRole('User');
 
         $this->admin = User::factory()->create();
-        $this->admin->assignRole('admin');
+        $this->admin->assignRole('Admin');
 
         $this->super_admin = User::factory()->create();
-        $this->super_admin->assignRole('super-admin');
+        $this->super_admin->assignRole('Super Admin');
 
         $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     protected function setupPermissions()
     {
-        Permission::findOrCreate('view book');
-        Permission::findOrCreate('add book');
-        Permission::findOrCreate('edit book');
-        Permission::findOrCreate('delete book');
-        Permission::findOrCreate('borrow book');
-        Permission::findOrCreate('approve book request');
-        Permission::findOrCreate('deny book request');
+        Permission::findOrCreate('View Books');
+        Permission::findOrCreate('Create Books');
+        Permission::findOrCreate('Edit Books');
+        Permission::findOrCreate('Delete Books');
+        Permission::findOrCreate('Borrow Books');
+        Permission::findOrCreate('Approve Book Requests');
+        Permission::findOrCreate('Deny Book Requests');
 
-        Role::findOrCreate('super-admin');
+        Role::findOrCreate('Super Admin');
 
-        Role::findOrCreate('admin')
-            ->givePermissionTo(['view book', 'approve book request', 'deny book request']);
+        Role::findOrCreate('Admin')
+            ->givePermissionTo(['View Books', 'Approve Book Requests', 'Deny Book Requests']);
 
-        Role::findOrCreate('user')
-            ->givePermissionTo(['view book', 'borrow book']);
+        Role::findOrCreate('User')
+            ->givePermissionTo(['View Books', 'Borrow Books']);
 
         $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
