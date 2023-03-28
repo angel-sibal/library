@@ -3,151 +3,88 @@
 namespace App\Http\Livewire;
 
 use Livewire\Component;
+use App\Models\BorrowedBook;
 use App\Models\Book as Books;
-use Livewire\WithFileUploads;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\View\View;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
+use App\Filament\Resources\BookResource;
+use Filament\Notifications\Notification;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Tables\Concerns\InteractsWithTable;
 
-class Book extends Component
+class Book extends Component implements HasTable
 {
-    use WithFileUploads;
+    use InteractsWithTable;
 
-    public $books, $title, $author, $stocks, $cover_image_filepath, $bookId, $updateBook = false, $addBook = false;
-
-    protected $listeners = ['deleteBook', 'editBook'];
-
-    protected $rules = [
-        'title' => 'required',
-        'author' => 'required',
-        'stocks' => 'required',
-        'cover_image_filepath' => 'image|max:1024',
-    ];
-
-    public function resetFields(){
-        $this->title = '';
-        $this->author = '';
-        $this->stocks = 0;
-        $this->cover_image_filepath = '';
-    }
-
-    public function render()
+    protected function getTableQuery(): Builder 
     {
-        $this->books = Books::select('id', 'title', 'author', 'stocks', 'cover_image_filepath')->get();
+        return Books::query();
+    } 
+    
+    public function render(): View
+    {
         return view('livewire.book');
     }
 
-    public function addBook()
+    protected function getTableColumns(): array 
     {
-        $this->resetFields();
-        $this->addBook = true;
-        $this->updateBook = false;
+        return [
+            TextColumn::make('title')
+                ->limit(50)
+                ->sortable()
+                ->searchable(),
+            TextColumn::make('author')
+                ->limit(50)
+                ->sortable()
+                ->searchable(),
+            ImageColumn::make('cover_image_filepath')
+                ->label('Cover Image')
+                ->height(100),
+            TextColumn::make('stocks')
+                ->sortable(),
+            TextColumn::make('created_at')
+                ->sortable(),
+            TextColumn::make('updated_at')
+                ->sortable(),
+        ];
     }
 
-    public function storeBook()
+    protected function getTableBulkActions(): array
     {
-        $this->validate();
-
-        $filepath = null;
-
-        if ($this->cover_image_filepath) {
-            $filepath = $this->cover_image_filepath->storeAs('images', $this->cover_image_filepath->getClientOriginalName(), 'public');
-        }
-
-        try {
-            Books::create([
-                'title' => $this->title,
-                'author' => $this->author,
-                'stocks' => $this->stocks,
-                'cover_image_filepath' => $filepath,
-            ]);
-            session()->flash('success', 'Book Created Successfully!!');
-            $this->resetFields();
-            $this->addBook = false;
-        } catch (\Exception $ex) {
-            session()->flash('error', 'Something goes wrong!!');
-        }
-    }
-
-    public function editBook($id){
-        try {
-            $book = Books::findOrFail($id);
-
-            if (!$book) {
-                session()->flash('error', 'Book not found');
-            } else {
-                $this->title = $book->title;
-                $this->author = $book->author;
-                $this->stocks = $book->stocks;
-                $this->bookId = $book->id;
-                $this->updateBook = true;
-                $this->addBook = false;
-            }
-        } catch (\Exception $ex) {
-            session()->flash('error', 'Something goes wrong!!');
-        }
-    }
-
-    public function updateBook()
-    {
-        $this->validate([
-            'title' => ['required', Rule::unique('books')->ignore($this->bookId)]
-        ]);
-      
-        try {
-            $deleteExistingCoverImage = false;
-
-            $formData = [
-                'title' => $this->title,
-                'author' => $this->author,
-                'stocks' => $this->stocks,
-            ];
-
-            if ($this->cover_image_filepath) {
-                $deleteExistingCoverImage = true;
-                $filepath = $this->cover_image_filepath->storeAs('images', $this->cover_image_filepath->getClientOriginalName(), 'public');
-                $formData['cover_image_filepath'] = $filepath;
-            }
-
-            $book = Books::find($this->bookId);
-
-            if ($deleteExistingCoverImage) {
-                if(Storage::disk('public')->exists($book->cover_image_filepath)){
-                    Storage::disk('public')->delete($book->cover_image_filepath);
+        return [
+            BulkAction::make('borrow')
+            ->visible(fn (Books $record): bool => auth()->user()->can('borrow', $record))
+            ->action(function (Collection $records, array $data): void {
+                foreach ($records as $record) {
+                    BorrowedBook::firstOrCreate([
+                        'book_id' => $record->id,
+                        'user_id' => auth()->user()->id,
+                    ]);
                 }
-            }
 
-            $book->update($formData);
+                Notification::make() 
+                    ->title('Borrowed book successfully')
+                    ->success()
+                    ->send(); 
+            })
+            ->label('Borrow Books')
+            ->deselectRecordsAfterCompletion()
+        ];
+    } 
 
-            session()->flash('success','Book Updated Successfully!!');
-            $this->resetFields();
-            $this->updateBook = false;
-        } catch (\Exception $ex) {
-            dd($ex);
-            session()->flash('success','Something goes wrong!!');
-        }
-    }
-
-    public function cancelBook()
+    protected function getTableActions(): array
     {
-        $this->addBook = false;
-        $this->updateBook = false;
-        $this->resetFields();
-    }
-
-    public function deleteBook($id)
-    {
-        try {
-            $book = Books::find($id);
-
-            if (Storage::disk('public')->exists($book->cover_image_filepath)) {
-                Storage::disk('public')->delete($book->cover_image_filepath);
-            }
-
-            $book->delete();
-
-            session()->flash('success',"Book Deleted Successfully!!");
-        } catch(\Exception $ex) {
-            session()->flash('error',"Something goes wrong!!");
-        }
+        return [
+            EditAction::make('edit')
+                ->url(fn (Books $record): string => route('filament.resources.books.edit', $record)),
+            DeleteAction::make(),
+        ];
     }
 }

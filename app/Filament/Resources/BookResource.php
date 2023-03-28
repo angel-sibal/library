@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Models\Book;
-use App\Models\BorrowedBook;
 use Filament\Resources\Form;
 use Filament\Resources\Table;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Notifications\Notification;
-use Filament\Tables\Columns\ImageColumn;
-use Illuminate\Database\Eloquent\Collection;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
 use App\Filament\Resources\BookResource\Pages;
 
 class BookResource extends Resource
@@ -22,16 +19,24 @@ class BookResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    public static function canCreate(): bool
-    {
-       return false;
-    }
-
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Card::make()->schema([
+                    TextInput::make('title')
+                        ->required()
+                        ->maxLength(125),
+                    TextInput::make('author')
+                        ->required()
+                        ->maxLength(125),
+                    FileUpload::make('cover_image-filepath')
+                        ->image(),
+                    TextInput::make('stocks')
+                        ->required()
+                        ->numeric()
+                        ->minValue(1),
+                ])->columns(2)
             ]);
     }
 
@@ -39,23 +44,7 @@ class BookResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')
-                    ->limit(50)
-                    ->sortable()
-                    ->searchable(),
-                TextColumn::make('author')
-                    ->limit(50)
-                    ->sortable()
-                    ->searchable(),
-                ImageColumn::make('cover_image_filepath')
-                    ->label('Cover Image')
-                    ->height(100),
-                TextColumn::make('stocks')
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->sortable(),
-                TextColumn::make('updated_at')
-                    ->sortable(),
+                //
             ])
             ->filters([
                 //
@@ -64,23 +53,7 @@ class BookResource extends Resource
                 //
             ])
             ->bulkActions([
-                BulkAction::make('borrow')
-                ->visible(fn (Book $record): bool => auth()->user()->can('borrow', $record))
-                ->action(function (Collection $records, array $data): void {
-                    foreach ($records as $record) {
-                        BorrowedBook::firstOrCreate([
-                            'book_id' => $record->id,
-                            'user_id' => auth()->user()->id,
-                        ]);
-                    }
-
-                    Notification::make() 
-                        ->title('Borrowed book successfully')
-                        ->success()
-                        ->send(); 
-                })
-                ->label('Borrow Books')
-                ->deselectRecordsAfterCompletion()
+                //
             ]);
     }
     
@@ -94,7 +67,9 @@ class BookResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBooks::route('/'),
+            'index' => Pages\Books::route('/'),
+            'create' => Pages\CreateBook::route('/create'),
+            'edit' => Pages\EditBook::route('/{record}/edit'),
         ];
     }
 }
