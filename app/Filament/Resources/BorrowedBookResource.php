@@ -48,7 +48,7 @@ class BorrowedBookResource extends Resource
                     ->limit(50)
                     ->sortable()
                     ->searchable(),
-                ImageColumn::make('book.cover_image_filepath')
+                ImageColumn::make('book.cover_image')
                     ->label('Cover Image')
                     ->height(100),
                 TextColumn::make('created_at')

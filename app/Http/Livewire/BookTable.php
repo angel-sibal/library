@@ -27,11 +27,11 @@ class BookTable extends DataTableComponent
             Column::make("Author", "author")
                 ->sortable()
                 ->searchable(),
-            Column::make("Image", "cover_image_filepath")
+            Column::make("Image", "cover_image")
                 ->hideIf(true),
             ImageColumn::make('Cover Image')
                 ->location(
-                    fn($row) => ($row->cover_image_filepath) ? URL::asset('/storage/' . $row->cover_image_filepath) : URL::asset('/storage/images/book-default-cover.jpg')
+                    fn($row) => ($row->cover_image) ? URL::asset('/storage/' . $row->cover_image) : URL::asset('/storage/images/book-default-cover.jpg')
                 )
                 ->attributes(fn($row) => [
                     'width' => '100px',

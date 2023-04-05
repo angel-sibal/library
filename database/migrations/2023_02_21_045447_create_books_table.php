@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('author');
             $table->smallInteger('stocks');
-            $table->string('cover_image_filepath')->nullable();
+            $table->string('cover_image')->nullable();
             $table->timestamps();
         });
     }

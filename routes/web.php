@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,4 +26,9 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::delete('/books/delete', [BookController::class, 'destroy'])->name('books.destroy');
+    Route::resource('books', BookController::class)->except([
+        'destroy'
+    ]);;
 });

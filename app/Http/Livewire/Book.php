@@ -10,13 +10,12 @@ use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
-use App\Filament\Resources\BookResource;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Concerns\InteractsWithTable;
 
 class Book extends Component implements HasTable
@@ -44,7 +43,7 @@ class Book extends Component implements HasTable
                 ->limit(50)
                 ->sortable()
                 ->searchable(),
-            ImageColumn::make('cover_image_filepath')
+            ImageColumn::make('cover_image')
                 ->label('Cover Image')
                 ->height(100),
             TextColumn::make('stocks')
@@ -60,22 +59,24 @@ class Book extends Component implements HasTable
     {
         return [
             BulkAction::make('borrow')
-            ->visible(fn (Books $record): bool => auth()->user()->can('borrow', $record))
-            ->action(function (Collection $records, array $data): void {
-                foreach ($records as $record) {
-                    BorrowedBook::firstOrCreate([
-                        'book_id' => $record->id,
-                        'user_id' => auth()->user()->id,
-                    ]);
-                }
+                ->visible(fn (Books $record): bool => auth()->user()->can('borrow', $record))
+                ->action(function (Collection $records, array $data): void {
+                    foreach ($records as $record) {
+                        BorrowedBook::firstOrCreate([
+                            'book_id' => $record->id,
+                            'user_id' => auth()->user()->id,
+                        ]);
+                    }
 
-                Notification::make() 
-                    ->title('Borrowed book successfully')
-                    ->success()
-                    ->send(); 
-            })
-            ->label('Borrow Books')
-            ->deselectRecordsAfterCompletion()
+                    Notification::make() 
+                        ->title('Borrowed book successfully')
+                        ->success()
+                        ->send(); 
+                })
+                ->label('Borrow Books')
+                ->deselectRecordsAfterCompletion(),
+            DeleteBulkAction::make()
+                ->visible(fn (Books $record): bool => auth()->user()->can('delete', $record)),
         ];
     } 
 
@@ -83,8 +84,10 @@ class Book extends Component implements HasTable
     {
         return [
             EditAction::make('edit')
+                ->visible(auth()->user()->can('edit'))
                 ->url(fn (Books $record): string => route('filament.resources.books.edit', $record)),
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->visible(auth()->user()->can('delete')),
         ];
     }
 }

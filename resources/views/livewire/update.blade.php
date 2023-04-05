@@ -43,22 +43,22 @@
             </div>
             <div class="md:flex md:items-center mb-6">
                 <div class="md:w-1/3">
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="cover_image_filepath">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="cover_image">
                         Upload file
                     </label>
                 </div>
                 <div class="md:w-2/3">
-                    <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 @error('cover_image_filepath') is-invalid @enderror" id="cover_image_filepath" type="file" min="0" wire:model="cover_image_filepath">
-                    @error('cover_image_filepath')
-                        <span class="text-danger">{{ $cover_image_filepath }}</span>
+                    <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 @error('cover_image') is-invalid @enderror" id="cover_image" type="file" min="0" wire:model="cover_image">
+                    @error('cover_image')
+                        <span class="text-danger">{{ $cover_image }}</span>
                     @enderror
                 </div>
-                <div wire:loading wire:target="cover_image_filepath">Uploading Cover Image...</div>
+                <div wire:loading wire:target="cover_image">Uploading Cover Image...</div>
             </div>
             <div class="md:flex md:items-center">
                 <div class="md:w-1/3"></div>
                 <div class="md:w-2/3">
-                    <button wire:click.prevent="updateBook()" wire:loading.attr="disabled" wire:target="cover_image_filepath" class="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded" type="button">
+                    <button wire:click.prevent="updateBook()" wire:loading.attr="disabled" wire:target="cover_image" class="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded" type="button">
                         Save
                     </button>
                     <button wire:click.prevent="cancelBook()" class="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded" type="button">

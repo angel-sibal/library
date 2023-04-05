@@ -18,7 +18,7 @@ class BookFactory extends Factory
             'title' => $this->faker->word(),
             'author' => $this->faker->name(),
             'stocks' => $this->faker->numberBetween(0, 100),
-            'cover_image_filepath' => null,
+            'cover_image' => null,
         ];
     }
 }

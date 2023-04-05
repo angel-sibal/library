@@ -30,7 +30,7 @@ class BookPolicy
      */
     public function view(User $user, Book $book)
     {
-        return $user->hasPermissionTo('View Books');
+        return $user->hasPermissionTo('View Books') ? true : null;
     }
 
     /**
@@ -41,7 +41,7 @@ class BookPolicy
      */
     public function create(User $user)
     {
-        return $user->hasPermissionTo('Create Books');
+        return $user->hasPermissionTo('Create Books') ? true : null;
     }
 
     /**
@@ -53,7 +53,7 @@ class BookPolicy
      */
     public function update(User $user, Book $book)
     {
-        return $user->hasPermissionTo('Edit Books');
+        return $user->hasPermissionTo('Edit Books') ? true : null;
     }
 
     /**
@@ -65,7 +65,7 @@ class BookPolicy
      */
     public function delete(User $user, Book $book)
     {
-        return $user->hasPermissionTo('Delete Books');
+        return $user->hasPermissionTo('Delete Books') ? true : null;
     }
 
     /**

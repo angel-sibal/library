@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BookResource\Pages;
 
+use App\Models\Book;
 use Filament\Resources\Pages\Page;
 use App\Filament\Resources\BookResource;
 use Filament\Pages\Actions\CreateAction;
@@ -12,12 +13,10 @@ class Books extends Page
 
     protected static string $view = 'filament.resources.book-resource.pages.books';
 
-    protected function getActions(): array
+    public $books;
+ 
+    public function mount()
     {
-        return [
-            CreateAction::make()
-                ->label('New Book')
-                ->url(BookResource::getUrl('create')),
-        ];
+        $this->books = Book::select('id', 'title', 'author', 'stocks', 'cover_image')->get();
     }
 }

@@ -94,7 +94,7 @@ class BookTest extends TestCase
             ->set('title', 'First Book Title')
             ->set('author', 'First Book Author')
             ->set('stocks', 5)
-            ->set('cover_image_filepath', UploadedFile::fake()->image('test-image.png'))
+            ->set('cover_image', UploadedFile::fake()->image('test-image.png'))
             ->call('storeBook');
  
         Storage::disk('public')->assertExists('images/test-image.png');
@@ -140,7 +140,7 @@ class BookTest extends TestCase
             'title' => 'First Book Title',
             'author' => 'First Book Author',
             'stocks' => 5,
-            'cover_image_filepath' => 'images/test-image.png',
+            'cover_image' => 'images/test-image.png',
         ]);
 
         $this->assertTrue(Books::whereTitle('First Book Title')->exists());
@@ -150,7 +150,7 @@ class BookTest extends TestCase
             ->set('title', 'Updated Book Title')
             ->set('author', 'Updated Book Author')
             ->set('stocks', 6)
-            ->set('cover_image_filepath', UploadedFile::fake()->image('test-image-2.png'))
+            ->set('cover_image', UploadedFile::fake()->image('test-image-2.png'))
             ->call('updateBook');
  
         Storage::disk('public')->assertExists('images/test-image-2.png');
@@ -170,7 +170,7 @@ class BookTest extends TestCase
             ->assertSet('title', '')
             ->assertSet('author', '')
             ->assertSet('stocks', 0)
-            ->assertSet('cover_image_filepath', '');
+            ->assertSet('cover_image', '');
     }
 
     public function test_edit_book_form_will_be_hidden_and_input_fields_will_be_cleared_upon_clicking_cancel_button()
@@ -192,7 +192,7 @@ class BookTest extends TestCase
             ->assertSet('title', '')
             ->assertSet('author', '')
             ->assertSet('stocks', 0)
-            ->assertSet('cover_image_filepath', '');
+            ->assertSet('cover_image', '');
     }
 
     public function test_super_admins_can_delete_a_book()
@@ -203,7 +203,7 @@ class BookTest extends TestCase
             'title' => 'First Book Title',
             'author' => 'First Book Author',
             'stocks' => 5,
-            'cover_image_filepath' => 'images/test-image.png',
+            'cover_image' => 'images/test-image.png',
         ]);
 
         $this->assertTrue(Books::whereTitle('First Book Title')->exists());
